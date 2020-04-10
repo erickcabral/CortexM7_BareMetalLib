@@ -57,6 +57,7 @@
  */
 
 #define NVIC_pPRI0_BASEADDR				0xE000E400U
+
 /*
  #define NVIC_pPRI0						((__volU32*)0xE000E400U)
  */
@@ -72,6 +73,10 @@
  //void setIRQ_PRIORITY(__uint8 irqNum);
  } NVIC_Reg_t;
  */
+void enableIRQ(__uint8 irqNum, boolean enable);
+void setIRQPenReg(__uint8 irqNum, boolean enable);
+void setIRQ_PRIORITY(uint16_t irqNum, uint8_t priority);
+
 /*<! SYSCFG CONFIG API >*/
 
 #define SYSCFG_BASEADDR				0x58000400U
@@ -100,6 +105,13 @@ void setEXTI_CR(SYSCFG_Reg_t *pSYSCFG, uint8_t pinNumber, uint16_t gpioX);
 #define IMR2				1
 #define IMR3				2
 
+
+#define DISABLED 		DISABLE
+#define RISING_EDGE 	1
+#define FALLING_EDGE 	2
+#define BOTH_EDGES 		3
+
+
 typedef struct {
 	__volU32 *pRTSR1;		// OFFSET 0x00U
 	__volU32 *pFTSR1;	// OFFSET 0x04U
@@ -110,6 +122,7 @@ typedef struct {
 //..
 } EXTI_Reg_t;
 
+void setPinEdgeDetector(EXTI_Reg_t *pEXTI, uint8_t pinNumber, uint8_t edgeType);
 void setRTSR(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable);
 void setFTSR(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable);
 void setRTandFT(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable);

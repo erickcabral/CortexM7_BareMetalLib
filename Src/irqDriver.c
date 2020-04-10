@@ -37,55 +37,67 @@ void setIRQPenReg(__uint8 irqNum, boolean enable) {
 		*pICPRx |= (1 << bitShift);
 	}
 }
-void setIRQ_PRIORITY(__uint8 irqNum) {
+void setIRQ_PRIORITY(uint16_t irqNum, uint8_t priority) {
+	uint8_t placeHolder = irqNum / 4; // PRx Register Place
+	uint8_t bitShifter = (irqNum == 0 ? irqNum : (irqNum % (placeHolder * 4)));
+	uint8_t validBitsShifter = (bitShifter + 4);
+	__volU32 *pPRx = ((__volU32*) (NVIC_pPRI0_BASEADDR + (placeHolder * 4)));
+
+	*(pPRx) |= (priority << validBitsShifter);
 
 }
 
 /*<! SYSCFG CONFIG >*/
-void setRTSR(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable) {
+/**
+ *  PIN EDGE DETECTOR TYPES:
+ *  DISABLED	(0)
+ *  RISING_EDGE (1)
+ *  FALLING_EDGE(2)
+ *  BOTH_EDGES 	(3)
+ */
+void setPinEdgeDetector(EXTI_Reg_t *pEXTI, uint8_t pinNumber, uint8_t edgeType) {
 	pEXTI->pRTSR1 = (__volU32*) (EXTI_RTSR_BASEADDR);
 	pEXTI->pFTSR1 = (__volU32*) (EXTI_FTSR1_BASEADDR);
-	setOneBitRegister(pEXTI->pRTSR1, pinNumber, enable);
-	setOneBitRegister(pEXTI->pFTSR1, pinNumber, DISABLE);
-	/*
-	 if (enable) {
-	 *(pEXTI->pRTSR1) |= (1 << pinNumber);
-	 } else {
-	 *(pEXTI->pRTSR1) &= ~(1 << pinNumber);
-	 }
-	 */
+	switch (edgeType) {
+	case 0:
+		setOneBitRegister(pEXTI->pRTSR1, pinNumber, DISABLE);
+		setOneBitRegister(pEXTI->pFTSR1, pinNumber, DISABLE);
+		break;
+	case 1:
+		setOneBitRegister(pEXTI->pRTSR1, pinNumber, ENABLE);
+		setOneBitRegister(pEXTI->pFTSR1, pinNumber, DISABLE);
+		break;
+	case 2:
+		setOneBitRegister(pEXTI->pRTSR1, pinNumber, DISABLE);
+		setOneBitRegister(pEXTI->pFTSR1, pinNumber, ENABLE);
+		break;
+	case 3:
+		setOneBitRegister(pEXTI->pRTSR1, pinNumber, ENABLE);
+		setOneBitRegister(pEXTI->pFTSR1, pinNumber, ENABLE);
+		break;
+	}
 }
-void setFTSR(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable) {
-	pEXTI->pRTSR1 = (__volU32*) (EXTI_RTSR_BASEADDR);
-	pEXTI->pFTSR1 = (__volU32*) (EXTI_FTSR1_BASEADDR);
-	setOneBitRegister(pEXTI->pRTSR1, pinNumber, DISABLE);
-	setOneBitRegister(pEXTI->pFTSR1, pinNumber, enable);
-	/*
-	 if (enable) {
-	 *(pEXTI->pFTSR1) |= (1 << pinNumber);
-	 } else {
-	 *(pEXTI->pFTSR1) &= ~(1 << pinNumber);
-	 }
-	 */
-}
-void setRTandFT(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable) {
-	pEXTI->pRTSR1 = (__volU32*) (EXTI_RTSR_BASEADDR);
-	pEXTI->pFTSR1 = (__volU32*) (EXTI_FTSR1_BASEADDR);
-	setOneBitRegister(pEXTI->pRTSR1, pinNumber, enable);
-	setOneBitRegister(pEXTI->pFTSR1, pinNumber, enable);
 
-	/*
-	 if (enable) {
-	 setOneBitRegister(pEXTI->pRTSR1, pinNumber, enable);
-	 setOneBitRegister(pEXTI->pFTSR1, pinNumber, enable);
-	 //*(pEXTI->pRTSR1) |= (1 << pinNumber);
-	 //*(pEXTI->pFTSR1) |= (1 << pinNumber);
-	 } else {
-	 *(pEXTI->pRTSR1) &= ~(1 << pinNumber);
-	 *(pEXTI->pFTSR1) &= ~(1 << pinNumber);
-	 }
-	 */
-}
+/*
+ void setRTSR(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable) {
+ pEXTI->pRTSR1 = (__volU32*) (EXTI_RTSR_BASEADDR);
+ pEXTI->pFTSR1 = (__volU32*) (EXTI_FTSR1_BASEADDR);
+ setOneBitRegister(pEXTI->pRTSR1, pinNumber, enable);
+ setOneBitRegister(pEXTI->pFTSR1, pinNumber, DISABLE);
+ }
+ void setFTSR(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable) {
+ pEXTI->pRTSR1 = (__volU32*) (EXTI_RTSR_BASEADDR);
+ pEXTI->pFTSR1 = (__volU32*) (EXTI_FTSR1_BASEADDR);
+ setOneBitRegister(pEXTI->pRTSR1, pinNumber, DISABLE);
+ setOneBitRegister(pEXTI->pFTSR1, pinNumber, enable);
+ }
+ void setRTandFT(EXTI_Reg_t *pEXTI, uint8_t pinNumber, boolean enable) {
+ pEXTI->pRTSR1 = (__volU32*) (EXTI_RTSR_BASEADDR);
+ pEXTI->pFTSR1 = (__volU32*) (EXTI_FTSR1_BASEADDR);
+ setOneBitRegister(pEXTI->pRTSR1, pinNumber, enable);
+ setOneBitRegister(pEXTI->pFTSR1, pinNumber, enable);
+ }
+ */
 
 void setEXTI_CR(SYSCFG_Reg_t *pSYSCFG, uint8_t pinNumber, uint16_t gpioX) {
 	uint8_t placeHolder = pinNumber / 4;
@@ -129,7 +141,7 @@ boolean enable) {
 	if (enable) {
 		setOneBitRegister(pEXTI->pCPUPR[imrX], maskNum, enable);
 	} else {
-		boolean pr = (*(pEXTI->pCPUPR[imrX])>> maskNum);
+		boolean pr = (*(pEXTI->pCPUPR[imrX]) >> maskNum);
 		if (pr == ENABLE) {
 			setOneBitRegister(pEXTI->pCPUPR[imrX], maskNum, DISABLE);
 		}
