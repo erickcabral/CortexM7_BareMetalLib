@@ -14,55 +14,71 @@
 #include "stm32H743xx.h"
 #include "irqDriver.h"
 #include "gpioDriver.h"
+#include "usartDriver.h"
+
 
 GPIOx_Confg_t gpioB;
+/*
+ int main(void) { //IRQ TEST //GPIO TEST
 
-int main(void) {
+ RCC_Reg_t rcc;
+ initializeRCC(&rcc);
+ enableSYSCFG(&rcc, ENABLE);
+ enableGPIOx(&rcc, GPIOC, ENABLE);
+ enableGPIOx(&rcc, GPIOB, ENABLE);
 
+ //GPIOx_Confg_t gpioB;
+ initializeGPIOx(&gpioB, GPIOB_BASEADDR);
+ setGPIOxModer(&gpioB, PIN_0, MODE_OUTPUT);
+ setGPIOxType(&gpioB, PIN_0, TYPE_PUSH_PULL);
+ setGPIOxResistor(&gpioB, PIN_0, PUPD_UP);
+
+ setGPIOxModer(&gpioB, PIN_14, MODE_OUTPUT);
+ setGPIOxType(&gpioB, PIN_14, TYPE_PUSH_PULL);
+ setGPIOxResistor(&gpioB, PIN_14, PUPD_UP);
+
+ GPIOx_Confg_t gpioC;
+ initializeGPIOx(&gpioC, GPIOC_BASEADDR);
+ setGPIOxModer(&gpioC, PIN_13, MODE_INPUT);
+ setGPIOxResistor(&gpioC, PIN_13, PUPD_DOWN);
+
+ SYSCFG_Reg_t syscfg;
+ setEXTI_CR(&syscfg, PIN_13, GPIOC);
+
+ EXTI_Reg_t exti;
+ setPinEdgeDetector(&exti, PIN_13, RISING_EDGE);
+
+ enableCPUIMRx(&exti, IMR1, PIN_13, ENABLE);
+
+ enableIRQ(40, TRUE);
+ setIRQ_PRIORITY(40, 15);
+
+ while (1) {
+ if (!getGPIOxState(&gpioB, PIN_14)) {
+ setGPIOxOutput(&gpioB, PIN_14, HIGH);
+ }
+
+ }
+ }
+ */
+int main(void) { //USART TEST
 	RCC_Reg_t rcc;
 	initializeRCC(&rcc);
-	enableSYSCFG(&rcc, ENABLE);
-	enableGPIOx(&rcc, GPIOC, ENABLE);
-	enableGPIOx(&rcc, GPIOB, ENABLE);
 
-	//GPIOx_Confg_t gpioB;
-	initializeGPIOx(&gpioB, GPIOB_BASEADDR);
-	setGPIOxModer(&gpioB, PIN_0, MODE_OUTPUT);
-	setGPIOxType(&gpioB, PIN_0, TYPE_PUSH_PULL);
-	setGPIOxResistor(&gpioB, PIN_0, PUPD_UP);
+	USART_Reg_t usart1;
+	enableUSARTx(&rcc, USART1);
+	usartX_initialize(&usart1, USART1_BASEADDR);
+	usart_setCommMode(&usart1, RX_TX);
+	usart_setParity(&usart1, ENABLE, PARITY_EVEN);
+	usart_setWordLength(&usart1, LENGHT_7_BITS);
 
-	setGPIOxModer(&gpioB, PIN_14, MODE_OUTPUT);
-	setGPIOxType(&gpioB, PIN_14, TYPE_PUSH_PULL);
-	setGPIOxResistor(&gpioB, PIN_14, PUPD_UP);
-
-	GPIOx_Confg_t gpioC;
-	initializeGPIOx(&gpioC, GPIOC_BASEADDR);
-	setGPIOxModer(&gpioC, PIN_13, MODE_INPUT);
-	setGPIOxResistor(&gpioC, PIN_13, PUPD_DOWN);
-
-	SYSCFG_Reg_t syscfg;
-	setEXTI_CR(&syscfg, PIN_13, GPIOC);
-
-	EXTI_Reg_t exti;
-	setPinEdgeDetector(&exti, PIN_13, RISING_EDGE);
-
-	enableCPUIMRx(&exti, IMR1, PIN_13, ENABLE);
-
-	enableIRQ(40, TRUE);
-	setIRQ_PRIORITY(40, 15);
-	//setIRQPenReg(40, TRUE);
-
-	while (1) {
-		if (!getGPIOxState(&gpioB, PIN_14)) {
-			setGPIOxOutput(&gpioB, PIN_14, HIGH);
-		}
+	while(TRUE){
 
 	}
 }
 
 void EXTI15_10_IRQHandler(void) {
 	EXTI_Reg_t exti;
-
 	boolean pinState = getGPIOxState(&gpioB, PIN_0);
 	if (pinState) {
 		setGPIOxOutput(&gpioB, PIN_0, LOW);

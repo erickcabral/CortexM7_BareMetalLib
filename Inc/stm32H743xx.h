@@ -29,6 +29,12 @@
 
 #define RCC_BASEADDR		0x58024400U
 
+#define APB1LENR 			(RCC_BASEADDR + 0x0E8U)
+#define C1_APB1LENR 		(RCC_BASEADDR + 0x148U)
+
+#define APB2ENR				(RCC_BASEADDR + 0x0F0U)
+#define C1_APB2ENR			(RCC_BASEADDR + 0x150U)
+
 /*<! RCC CONFIG API >*/
 typedef struct {
 	__volU32 *pAHB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x0E0U);
@@ -37,13 +43,17 @@ typedef struct {
 	__volU32 *pAPB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x0F4U);
 	__volU32 *pC1_APB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x154U);
 
+	__volU32 *pAPB1LENR; // = (__volU32*)(RCC_BASEADDR + 0x0E8U);
+	__volU32 *pC1_APB1LENR; // = (__volU32*)(RCC_BASEADDR + 0x148U);
+
+	__volU32 *pAPB2ENR; 		// OFFSET 0x0F0U;
+	__volU32 *pC1_APB2ENR; 		// OFFSET 0x150;
+
 } RCC_Reg_t;
 
 void initializeRCC(RCC_Reg_t *pRCC);
 void enableSYSCFG(RCC_Reg_t *pRCC, boolean enable);
 void enableGPIOx(RCC_Reg_t *pRCC, uint8_t gpioX, boolean enable);
-
-
 
 /*<! SUPPORT FUCNTIONS >*/
 void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, uint8_t newValue);
