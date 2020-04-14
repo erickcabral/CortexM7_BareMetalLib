@@ -57,13 +57,13 @@
 #define PUPD_UP					0b01 /* Resistor UP */
 #define PUPD_DOWN				0b10 /* REsistor Down */
 
-#define MODE_INPUT				0b00 /* Low speed */
-#define MODE_OUTPUT				0b01 /* Medium speed */
-#define MODE_ALT_FUNC			0b10 /* High speed */
-#define MODE_ANALOG				0b11 /* Very high speed */
+#define SPEED_LOW				0b00 /* Low speed */
+#define SPEED_MEDIUM			0b01 /* Medium speed */
+#define SPEED_HIGH				0b10 /* High speed */
+#define SPEED_VERY_HIGH			0b11 /* Very high speed */
 
 typedef struct {
-	__volU32* pMODER;// = (__volU32*) (GPIOx_BASEADDR + 0x00U);
+	__volU32* pMODER ;// = (__volU32*) (GPIOx_BASEADDR + 0x00U);
 	__volU32* pOTYPER;// = (__volU32*) (GPIOx_BASEADDR + 0x04U);
 	__volU32* pOSPEEDR;// = (__volU32*) (GPIOx_BASEADDR + 0x08U);
 	__volU32* pPUPDR;// = (__volU32*) (GPIOx_BASEADDR + 0x0CU);
@@ -73,10 +73,10 @@ typedef struct {
 	__volU32* pLCKR;// = (__volU32*) (GPIOx_BASEADDR + 0x1CU);
 	__volU32* pAFRL;// = (__volU32*) (GPIOx_BASEADDR + 0x20U);
 	__volU32* pAFRH;// = (__volU32*) (GPIOx_BASEADDR + 0x24U);
-
 } GPIOx_Confg_t;
 
-void initializeGPIOx(GPIOx_Confg_t *gpioX, uint32_t gpio_baseAddr);
+//void initializeGPIOx(GPIOx_Confg_t *gpioX, uint32_t gpio_baseAddr);
+void initializeGPIOx(GPIOx_Confg_t *pGPIOx, uint8_t gpioX);
 void setGPIOxModer(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinMode );
 void setGPIOxType(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinType );
 void setGPIOxSpeed(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinSpeed );
@@ -87,5 +87,9 @@ void setGPIOxBSRR(GPIOx_Confg_t* gpioX, uint16_t pinNumber,boolean set_reset );
 void setGPIOxLOCK(GPIOx_Confg_t* gpioX, uint16_t pinNumber,boolean locked  );
 void setGPIOxALTFunc(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint16_t altFunc );
 
+/**
+ *  @SUPPORT FUNCTIONS
+ */
 
+uint32_t gpio_GetGPIOxBASEADDRESS(uint8_t gpioX);
 #endif /* GPIODRIVER_H_ */
