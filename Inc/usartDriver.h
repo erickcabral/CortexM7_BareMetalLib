@@ -60,13 +60,13 @@ typedef struct {
 #define RTS		2 //Request to Send
 
 /*<! BAUD RATE >*/
-#define BAUD_1200		1200
-#define BAUD_2400		2400
-#define BAUD_4800		4800
-#define BAUD_9600		9600
-#define BAUD_19200		19200
-#define BAUD_38400		38400
-#define BAUD_57600		57600
+#define BAUD_1200		0
+#define BAUD_2400		1
+#define BAUD_4800		2
+#define BAUD_9600		3
+#define BAUD_19200		4
+#define BAUD_38400		5
+#define BAUD_57600		6
 
 /*<! WORD LENGHT >*/
 #define LENGTH_8_BITS 			0	//00: 1 start bit, 8 Data bits, n Stop bit

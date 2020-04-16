@@ -35,8 +35,24 @@
 #define APB2ENR				(RCC_BASEADDR + 0x0F0U)
 #define C1_APB2ENR			(RCC_BASEADDR + 0x150U)
 
+/**
+ * @RCC_AHB4ENR BITS
+ */
+
+#define RCC_AHB4ENR_ADC3EN		24
+
+/**
+ * @RCC_AHB1ENR BITS
+ */
+#define RCC_AHB4ENR_ADC12EN		5
+
+
 /*<! RCC CONFIG API >*/
 typedef struct {
+
+	__volU32 *pAHB1ENR; 	//OFFSET 0x0D8U
+	__volU32 *pC1_AHB1ENR; 	//OFFSET 0x138U
+
 	__volU32 *pAHB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x0E0U);
 	__volU32 *pC1_AHB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x140U);
 
@@ -56,7 +72,12 @@ void enableSYSCFG(RCC_Reg_t *pRCC, boolean enable);
 void enableGPIOx(RCC_Reg_t *pRCC, uint8_t gpioX, boolean enable);
 
 /*<! SUPPORT FUCNTIONS >*/
+void clearBits(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits);
 void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, uint8_t newValue);
 void setTwoBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue);
+void setThreeBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue);
+void setForBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue);
+
+uint8_t getRegisterValue(__volU32 *pRegister, uint8_t bitToRead);
 
 #endif /* STM32H743XX_H_ */

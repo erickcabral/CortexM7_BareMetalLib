@@ -36,13 +36,42 @@ void enableSYSCFG(RCC_Reg_t *pRCC, boolean enable) {
 }
 
 /*<!   >*/
+void clearBits(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits) {
+	switch (numberOfBits) {
+	case 1:
+		*pRegister &= ~((1 << leastBit));
+		break;
+	case 2:
+		*pRegister &= ~((1 << (leastBit + 1)) | (1 << leastBit));
+		break;
+	case 3:
+		*pRegister &= ~((1 << (leastBit + 2)) | (1 << (leastBit + 1))
+				| (1 << leastBit));
+		break;
+	case 4:
+		*pRegister &= ~((1 << (leastBit + 3)) | (1 << (leastBit + 2))
+				| (1 << (leastBit + 1)) | (1 << leastBit));
+		break;
+	}
+}
 void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, uint8_t newValue) {
-	*pRegister &= ~((1 << leastBit));
+	//clearBits(pRegister, leastBit, 1);
 	*pRegister |= (newValue << leastBit);
 }
 
 void setTwoBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue) {
-	*pRegister &= ~((1 << (leastBit + 1)) | (1 << leastBit));
+	clearBits(pRegister, leastBit, 2);
+	*pRegister |= (newValue << leastBit);
+}
+void setThreeBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue) {
+	clearBits(pRegister, leastBit, 3);
+	*pRegister |= (newValue << leastBit);
+}
+void setForBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue) {
+	clearBits(pRegister, leastBit, 4);
 	*pRegister |= (newValue << leastBit);
 }
 
+uint8_t getRegisterValue(__volU32 *pRegister, uint8_t bitToRead) {
+	return (*(pRegister) >> bitToRead);
+}

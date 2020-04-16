@@ -68,3 +68,11 @@ uint32_t gpio_GetGPIOxBASEADDRESS(uint8_t gpioX) {
 	}
 	return 0x0;
 }
+
+/*<! SET DEFAUT OUTPUT >*/
+void gpio_defaultPinOutput(GPIOx_Confg_t *pGPIOx, uint8_t pinNumber){
+	setTwoBitRegister(pGPIOx->pMODER, (pinNumber*2), MODE_OUTPUT);
+	setOneBitRegister(pGPIOx->pOTYPER, (pinNumber), TYPE_PUSH_PULL);
+	setTwoBitRegister(pGPIOx->pOSPEEDR, (pinNumber*2), SPEED_LOW);
+	setTwoBitRegister(pGPIOx->pPUPDR, (pinNumber*2), PUPD_UP);
+}

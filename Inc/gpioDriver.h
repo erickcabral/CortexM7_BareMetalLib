@@ -92,4 +92,5 @@ void setGPIOxALTFunc(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint16_t altFunc )
  */
 
 uint32_t gpio_GetGPIOxBASEADDRESS(uint8_t gpioX);
+void gpio_defaultPinOutput(GPIOx_Confg_t *pGPIOx, uint8_t pinNumber);
 #endif /* GPIODRIVER_H_ */

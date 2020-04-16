@@ -98,9 +98,9 @@ void usartX_initialize(USART_Reg_t *pUSARTx, uint32_t usartX_baseaddr) {
 	/* PARITY -> ENABLE */
 	*(pUSARTx->pCR1) |= (1 << 10); 		// (PCE) PARITY ENABLE;
 
-	uint8_t STOP_BITS = STOP_1_0;
-	uint8_t BAUND_RATE = BAUD_9600;
-	uint8_t FLOW_CONTROL = CTS;
+	//uint8_t STOP_BITS = STOP_1_0;
+	//uint8_t BAUND_RATE = BAUD_9600;
+	//uint8_t FLOW_CONTROL = CTS;
 	//TODO
 
 	/*USART ENABLE */
