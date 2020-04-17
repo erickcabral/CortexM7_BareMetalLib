@@ -11,26 +11,26 @@
 #include "stm32H743xx.h"
 #include "gpioDriver.h"
 
-#define ADC1 			1  //AHB1
-#define ADC2 			2  //AHB1
+#define ADC1 				1  //AHB1
+#define ADC2 				2  //AHB1
 #define ADC1_2_BASEADDRESS	0x40022000  //AHB1
-#define	ADC3 			3  //AHB4
-#define	ADC3_BASEADDR	0x58026000  //AHB4
+#define	ADC3 				3  //AHB4
+#define	ADC3_BASEADDR		0x58026000  //AHB4
 
 /**
  * @ISR BITS
  */
-#define	ADC_ISR_JQOVF	10
-#define	ADC_ISR_AWD3	9
-#define	ADC_ISR_AWD2	8
-#define	ADC_ISR_AWD1	7
-#define	ADC_ISR_JEOS	6
-#define	ADC_ISR_JEOC	5
-#define	ADC_ISR_OVR		4
-#define	ADC_ISR_EOS		3
-#define	ADC_ISR_EOC		2
-#define	ADC_ISR_EOSMP	1
-#define	ADC_ISR_ADRDY	0
+#define	ADC_ISR_JQOVF		10
+#define	ADC_ISR_AWD3		9
+#define	ADC_ISR_AWD2		8
+#define	ADC_ISR_AWD1		7
+#define	ADC_ISR_JEOS		6
+#define	ADC_ISR_JEOC		5
+#define	ADC_ISR_OVR			4
+#define	ADC_ISR_EOS			3
+#define	ADC_ISR_EOC			2
+#define	ADC_ISR_EOSMP		1
+#define	ADC_ISR_ADRDY		0
 
 /**
  * @IER BITS
@@ -100,26 +100,26 @@
 /**
  * @ADC_SMPR2 BITS
  */
-#define ADC_PCSEL_PCSEL0	0
-#define ADC_PCSEL_PCSEL1	1
-#define ADC_PCSEL_PCSEL2	2
-#define ADC_PCSEL_PCSEL3	3
-#define ADC_PCSEL_PCSEL4	4
-#define ADC_PCSEL_PCSEL5	5
-#define ADC_PCSEL_PCSEL6	6
-#define ADC_PCSEL_PCSEL7	7
-#define ADC_PCSEL_PCSEL8	8
-#define ADC_PCSEL_PCSEL9	9
-#define ADC_PCSEL_PCSEL10	10
-#define ADC_PCSEL_PCSEL11	11
-#define ADC_PCSEL_PCSEL12	12
-#define ADC_PCSEL_PCSEL13	13
-#define ADC_PCSEL_PCSEL14	14
-#define ADC_PCSEL_PCSEL15	15
-#define ADC_PCSEL_PCSEL16	16
-#define ADC_PCSEL_PCSEL17	17
-#define ADC_PCSEL_PCSEL18	18
-#define ADC_PCSEL_PCSEL19	19
+#define ADC_CHANNEL_0	0
+#define ADC_CHANNEL_1	1
+#define ADC_CHANNEL_2	2
+#define ADC_CHANNEL_3	3
+#define ADC_CHANNEL_4	4
+#define ADC_CHANNEL_5	5
+#define ADC_CHANNEL_6	6
+#define ADC_CHANNEL_7	7
+#define ADC_CHANNEL_8	8
+#define ADC_CHANNEL_9	9
+#define ADC_CHANNEL_10	10
+#define ADC_CHANNEL_11	11
+#define ADC_CHANNEL_12	12
+#define ADC_CHANNEL_13	13
+#define ADC_CHANNEL_14	14
+#define ADC_CHANNEL_15	15
+#define ADC_CHANNEL_16	16
+#define ADC_CHANNEL_17	17
+#define ADC_CHANNEL_18	18
+#define ADC_CHANNEL_19	19
 
 /**
  * @ADC_SQR1 BITS
@@ -157,6 +157,7 @@
 /**
  * @ADCx_CCR BITS
  */
+#define ADCx_CCR_CKMODE				16
 #define ADCx_CCR_VOLTAGE_SENSOR		22
 #define ADCx_CCR_TEMP_SENSOR		23
 #define ADCx_CCR_BAT_SENSOR			24
@@ -182,17 +183,19 @@ typedef struct {
 typedef struct {
 	GPIOx_Confg_t gpioX;
 	ADC_Reg_t adcReg;
+	RCC_Reg_t rccReg;
 } ADC_Handler_t;
 
-/**
- * @
- */
-void adc_enable(RCC_Reg_t *pRCC, uint8_t adcX);
 
 /**
  * @
  */
-void adc_initialize(ADC_Handler_t *pADC_Handler, uint8_t gpioX, uint8_t adcX);
+void adc_enable(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t adcX) ;
+
+/**
+ * @
+ */
+void adc_initialize(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t gpioX, uint8_t adcX);
 
 /**
  * @
@@ -204,6 +207,22 @@ void adc_setupAnalogPin(ADC_Handler_t *pADC_Handler, uint8_t pinNumber);
  */
 void adc_setChannel(ADC_Handler_t *pADC_Handler, uint8_t channelX,
 		boolean enable);
+
+/**
+ * @ADC CLOCK OPTIONS
+ */
+#define KERNEL_CLK_PLL2		0	//0b00: pll2_p_ck clock selected as kernel peripheral clock (default after reset)
+#define KERNEL_CLK_PLL3		1	//0b01: pll3_r_ck clock selected as kernel peripheral clock
+#define KERNEL_CLK_PER_CK	2	//0b10: per_ck clock selected as kernel peripheral clock
+
+#define ADCx_CKMODE_P_CK  		0
+#define ADCx_CKMODE_HCLK_1  	1
+#define ADCx_CKMODE_HCLK 2  	2
+#define ADCx_CKMODE_HCLK_4 		3
+
+
+void adc_setADCclock(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler,
+		uint8_t adc_clk, uint8_t adcX_ckMode_clk) ; /*!< SET ADC CLOCK >*/
 
 /**
  * @ADC_SAMPLER CLCK CYCLES

@@ -18,7 +18,9 @@ void initializeRCC(RCC_Reg_t *pRCC) {
 	pRCC->pC1_APB1LENR = (__volU32*) (RCC_BASEADDR + 0x148U);
 
 	pRCC->pAPB2ENR = (__volU32*) (RCC_BASEADDR + 0x0F0U);
-	pRCC->pC1_APB2ENR = (__volU32*) (RCC_BASEADDR + 0x150);
+	pRCC->pC1_APB2ENR = (__volU32*) (RCC_BASEADDR + 0x150U);
+
+	pRCC->pD3CCIPR = (__volU32*) (RCC_BASEADDR + 0x058U);
 }
 
 void enableGPIOx(RCC_Reg_t *pRCC, uint8_t gpioX, boolean enable) {
@@ -36,7 +38,7 @@ void enableSYSCFG(RCC_Reg_t *pRCC, boolean enable) {
 }
 
 /*<!   >*/
-void clearBits(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits) {
+void resetBit(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits) {
 	switch (numberOfBits) {
 	case 1:
 		*pRegister &= ~((1 << leastBit));
@@ -54,21 +56,25 @@ void clearBits(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits) {
 		break;
 	}
 }
-void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, uint8_t newValue) {
-	//clearBits(pRegister, leastBit, 1);
-	*pRegister |= (newValue << leastBit);
+void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, boolean enable) {
+	if (enable) {
+		*pRegister |= (enable << leastBit);
+	} else {
+		resetBit(pRegister, leastBit, 1);
+	}
 }
 
 void setTwoBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue) {
-	clearBits(pRegister, leastBit, 2);
+	resetBit(pRegister, leastBit, 2);
 	*pRegister |= (newValue << leastBit);
 }
-void setThreeBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue) {
-	clearBits(pRegister, leastBit, 3);
+void setThreeBitRegister(__volU32 *pRegister, uint8_t leastBit,
+		uint16_t newValue) {
+	resetBit(pRegister, leastBit, 3);
 	*pRegister |= (newValue << leastBit);
 }
 void setForBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue) {
-	clearBits(pRegister, leastBit, 4);
+	resetBit(pRegister, leastBit, 4);
 	*pRegister |= (newValue << leastBit);
 }
 

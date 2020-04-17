@@ -61,7 +61,7 @@ void setPinEdgeDetector(EXTI_Reg_t *pEXTI, uint8_t pinNumber, uint8_t edgeType) 
 	switch (edgeType) {
 	case 0:
 		setOneBitRegister(pEXTI->pRTSR1, pinNumber, DISABLE);
-		setOneBitRegister(pEXTI->pFTSR1, pinNumber, DISABLE);
+		setOneBitRegister(pEXTI->pFTSR1, pinNumber,DISABLE);
 		break;
 	case 1:
 		setOneBitRegister(pEXTI->pRTSR1, pinNumber, ENABLE);

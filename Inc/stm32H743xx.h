@@ -46,24 +46,31 @@
  */
 #define RCC_AHB4ENR_ADC12EN		5
 
+/**
+ * @RCC_D3CCIPR BITS
+ */
+#define RCC_D3CCIPR_ADCSEL		16
+
 
 /*<! RCC CONFIG API >*/
 typedef struct {
 
-	__volU32 *pAHB1ENR; 	//OFFSET 0x0D8U
-	__volU32 *pC1_AHB1ENR; 	//OFFSET 0x138U
+	__volU32 *pAHB1ENR; 		//OFFSET 0x0D8U
+	__volU32 *pC1_AHB1ENR; 		//OFFSET 0x138U
 
-	__volU32 *pAHB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x0E0U);
-	__volU32 *pC1_AHB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x140U);
+	__volU32 *pAHB4ENR; 		// = (__volU32*)(RCC_BASEADDR + 0x0E0U);
+	__volU32 *pC1_AHB4ENR; 		// = (__volU32*)(RCC_BASEADDR + 0x140U);
 
-	__volU32 *pAPB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x0F4U);
-	__volU32 *pC1_APB4ENR; // = (__volU32*)(RCC_BASEADDR + 0x154U);
+	__volU32 *pAPB4ENR; 		// = (__volU32*)(RCC_BASEADDR + 0x0F4U);
+	__volU32 *pC1_APB4ENR; 		// = (__volU32*)(RCC_BASEADDR + 0x154U);
 
-	__volU32 *pAPB1LENR; // = (__volU32*)(RCC_BASEADDR + 0x0E8U);
-	__volU32 *pC1_APB1LENR; // = (__volU32*)(RCC_BASEADDR + 0x148U);
+	__volU32 *pAPB1LENR; 		// = (__volU32*)(RCC_BASEADDR + 0x0E8U);
+	__volU32 *pC1_APB1LENR; 	// = (__volU32*)(RCC_BASEADDR + 0x148U);
 
 	__volU32 *pAPB2ENR; 		// OFFSET 0x0F0U;
-	__volU32 *pC1_APB2ENR; 		// OFFSET 0x150;
+	__volU32 *pC1_APB2ENR; 		// OFFSET 0x150U;
+
+	__volU32 *pD3CCIPR; 		// OFFSET 0x058U
 
 } RCC_Reg_t;
 
@@ -72,10 +79,11 @@ void enableSYSCFG(RCC_Reg_t *pRCC, boolean enable);
 void enableGPIOx(RCC_Reg_t *pRCC, uint8_t gpioX, boolean enable);
 
 /*<! SUPPORT FUCNTIONS >*/
-void clearBits(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits);
-void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, uint8_t newValue);
+void resetBit(__volU32 *pRegister, uint8_t leastBit, uint8_t numberOfBits);
+void setOneBitRegister(__volU32 *pRegister, uint8_t leastBit, boolean enable);
 void setTwoBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue);
-void setThreeBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue);
+void setThreeBitRegister(__volU32 *pRegister, uint8_t leastBit,
+		uint16_t newValue);
 void setForBitRegister(__volU32 *pRegister, uint8_t leastBit, uint16_t newValue);
 
 uint8_t getRegisterValue(__volU32 *pRegister, uint8_t bitToRead);

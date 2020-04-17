@@ -7,7 +7,7 @@
 
 #include "adcDriver.h"
 
-void adc_enable(RCC_Reg_t *pRCC, uint8_t adcX) {
+void adc_enable(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t adcX) {
 	switch (adcX) {
 	case ADC1:
 	case ADC2:
@@ -21,8 +21,11 @@ void adc_enable(RCC_Reg_t *pRCC, uint8_t adcX) {
 		setOneBitRegister(pRCC->pAHB4ENR, RCC_AHB4ENR_ADC3EN, 1);
 		break;
 	}
+
+	setTwoBitRegister(pRCC->pD3CCIPR, RCC_D3CCIPR_ADCSEL, KERNEL_CLK_PER_CK); //ENABLE PERIPHERAL ADC CLOCK
+	adc_setADCclock(pRCC, pADC_Handler, KERNEL_CLK_PER_CK, ADCx_CKMODE_P_CK);
 }
-void adc_initialize(ADC_Handler_t *pADC_Handler, uint8_t gpioX, uint8_t adcX) {
+void adc_initialize(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t gpioX, uint8_t adcX) {
 	/*< GPIOx REGISTER INITIALIZATION >*/
 	initializeGPIOx(&pADC_Handler->gpioX, gpioX);
 
@@ -97,8 +100,10 @@ uint32_t adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t channelX) {
 	if (getRegisterValue(pADC_Handler->adcReg.pCR, ADC_CR_ADEN) != TRUE) {
 		adc_setADC_On_Off(pADC_Handler, ENABLE);
 	}
+	//setOneBitRegister(pADC_Handler->adcReg.pPCSEL, channelX, ENABLE);
+	*(pADC_Handler->adcReg.pPCSEL) = (1 << channelX);
 	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADSTART, ENABLE);
-	while (getRegisterValue(pADC_Handler->adcReg.pISR, ADC_ISR_EOC) != TRUE) {
+	while (getRegisterValue(pADC_Handler->adcReg.pISR, ADC_ISR_EOC)== FALSE) {
 		//BLOCK UNTIL THE AND OF CONERSION
 		//	setOneBitRegister(pADC_Handler->adcReg.pISR, ADC_ISR_EOC, TRUE);
 	}
@@ -125,15 +130,21 @@ uint32_t adc_getADC_baseaddress(uint8_t adcX) {
  *  TURN ADC ON
  */
 void adc_setADC_On_Off(ADC_Handler_t *pADC_Handler, boolean enable) {
-	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADEN, ENABLE);
-	/*
+
 	if (enable) {
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADEN, ENABLE);
 		while (getRegisterValue(pADC_Handler->adcReg.pISR, ADC_ISR_ADRDY)
 				== DISABLE) {
-
 		}
+	} else {
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADEN, ENABLE);
+
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_JADSTART, ENABLE);
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADSTART, ENABLE);
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADCAL, ENABLE);
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADDIS, ENABLE);
+		setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADSTP, ENABLE);
 	}
-	*/
 }
 
 void adc_enableTempSensor(ADC_Handler_t *pADC_Handler, boolean enable) {
@@ -141,6 +152,22 @@ void adc_enableTempSensor(ADC_Handler_t *pADC_Handler, boolean enable) {
 			enable);
 
 	setOneBitRegister(pADC_Handler->adcReg.pADCx_CCR, ADCx_CCR_VOLTAGE_SENSOR,
-				enable);
+			enable);
 }
 
+/**
+ * @ SELECT ADC CLOCK
+ *  adc_clk -> ADC_CLK_PLL2 | ADC_CLK_PLL3 | ADC_CLK_PER_CK
+ */
+void adc_setADCclock(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler,
+		uint8_t adc_clk, uint8_t adcX_ckMode_clk) {
+	setTwoBitRegister(pRCC->pD3CCIPR, RCC_D3CCIPR_ADCSEL, adc_clk);
+	if (adc_clk == KERNEL_CLK_PER_CK) {
+		setTwoBitRegister(pADC_Handler->adcReg.pADCx_CCR, ADCx_CCR_CKMODE,
+				ADCx_CKMODE_P_CK);
+	} else {
+		setTwoBitRegister(pADC_Handler->adcReg.pADCx_CCR, ADCx_CCR_CKMODE,
+				adcX_ckMode_clk);
+	}
+
+}
