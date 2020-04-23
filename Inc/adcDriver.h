@@ -53,7 +53,7 @@
 #define ADC_CR_ADCAL			31
 #define ADC_CR_ADCALDIF			30
 #define ADC_CR_DEEPPWD			29
-#define ADC_CR_ADVREGEN			28
+#define ADC_CR_ADVREGEN			0x1C //28
 #define ADC_CR_LINCALRDYW6		27
 #define ADC_CR_LINCALRDYW5		26
 #define ADC_CR_LINCALRDYW4		25
@@ -186,43 +186,57 @@ typedef struct {
 	RCC_Reg_t rccReg;
 } ADC_Handler_t;
 
+/**
+ * @
+ */
+void adc_enable(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t adcX);
 
 /**
  * @
  */
-void adc_enable(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t adcX) ;
-
-/**
- * @
- */
-void adc_initialize(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t gpioX, uint8_t adcX);
+void adc_initialize(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t gpioX,
+		uint8_t adcX);
 
 /**
  * @
  */
 void adc_setupAnalogPin(ADC_Handler_t *pADC_Handler, uint8_t pinNumber);
 
+
 /**
- * @
+ * @ADC CALIBRATION SETTINGS
+ */
+#define ADCAL_TYPE_SINGLE_END			0	//SINGLE-END CALIBRATION
+#define ADCAL_TYPE_DIFFERENTIAL			1	//DIFFERENTIAL CALINRATION
+
+#define ADCAL_LINEARITY_ON			ENABLE	//LINEARITY ON
+#define ADCAL_LINEARITY_OFF			DISABLE	//LINEARITY OFF
+void adc_startCalibration(ADC_Handler_t *pADC_Handler, boolean adcal_type, boolean adcal_linearity);
+
+
+
+/**
+ * @ADC CHANNEL SELECTOR
  */
 void adc_setChannel(ADC_Handler_t *pADC_Handler, uint8_t channelX,
-		boolean enable);
+boolean enable);
 
 /**
- * @ADC CLOCK OPTIONS
+ * @RCC ADCSEL CLOCK OPTIONS
  */
-#define KERNEL_CLK_PLL2		0	//0b00: pll2_p_ck clock selected as kernel peripheral clock (default after reset)
-#define KERNEL_CLK_PLL3		1	//0b01: pll3_r_ck clock selected as kernel peripheral clock
-#define KERNEL_CLK_PER_CK	2	//0b10: per_ck clock selected as kernel peripheral clock
-
-#define ADCx_CKMODE_P_CK  		0
-#define ADCx_CKMODE_HCLK_1  	1
-#define ADCx_CKMODE_HCLK 2  	2
-#define ADCx_CKMODE_HCLK_4 		3
-
+#define ADCSEL_CLK_PLL2			0	//0b00: pll2_p_ck clock selected as kernel peripheral clock (default after reset)
+#define ADCSEL_CLK__PLL3		1	//0b01: pll3_r_ck clock selected as kernel peripheral clock
+#define ADCSEL_CLK_PERIPH_CLK	2	//0b10: per_ck clock selected as kernel peripheral clock
+/**
+ * @ADCx CKMODE OPTIONS
+ */
+#define ADCx_CKMODE_P_CK 	 		0
+#define ADCx_CKMODE_HCLK_DIV_1  	1 //This configuration must be enabled only if the AHB clock prescaler is set to 1 (HPRE[3:0] = 0xxx in RCC_CFGR register) and if the system clock has a 50% duty cycle.
+#define ADCx_CKMODE_HCLK_DIV_2  	2
+#define ADCx_CKMODE_HCLK_DIV_4 		3
 
 void adc_setADCclock(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler,
-		uint8_t adc_clk, uint8_t adcX_ckMode_clk) ; /*!< SET ADC CLOCK >*/
+		uint8_t adcsel_clk_options, uint8_t adcX_clk_mode_options); /*!< SET ADC CLOCK >*/
 
 /**
  * @ADC_SAMPLER CLCK CYCLES
@@ -246,7 +260,7 @@ void adc_setSeq(ADC_Handler_t *pADC_Handler, uint8_t sqrX, uint8_t channelX);
 /**
  * @
  */
-uint32_t adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t pinNumber);
+int adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t pinNumber);
 
 /**
  *  SUPPORT FUNCTIONS
@@ -256,7 +270,8 @@ uint32_t adc_getADC_baseaddress(uint8_t adcX);
 
 void adc_setADC_On_Off(ADC_Handler_t *pADC_Handler, boolean enable);
 /*!< TEMP SENSOR >*/
-
 void adc_enableTempSensor(ADC_Handler_t *pADC_Handler, boolean enable);
+
+int adc_getTempCelsius(ADC_Handler_t *pADC_Handler, int tempSensorReading);
 
 #endif /* ADCDRIVER_H_ */

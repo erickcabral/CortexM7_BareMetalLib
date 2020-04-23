@@ -10,8 +10,8 @@
 int main(void) {
 
 	RCC_Reg_t rcc;
-	initializeRCC(&rcc);
-	enableGPIOx(&rcc, GPIOB, ENABLE);
+	rcc_initialize(&rcc);
+	rcc_enableGPIOx(&rcc, GPIOB, ENABLE);
 
 	GPIOx_Confg_t gpioB;
 	initializeGPIOx(&gpioB, GPIOB);
@@ -22,9 +22,12 @@ int main(void) {
 	adc_initialize(&rcc, &adc_Handler, GPIOB, ADC3);
 	adc_enable(&rcc, &adc_Handler, ADC3);
 
-	/*< Setting analog Pin >*/
+	/*< Setting Internal Temperature Sensor Config. >*/
 	adc_setChannel(&adc_Handler, ADC_CHANNEL_19, ENABLE);
 	adc_setSampleTime(&adc_Handler, ADC_CHANNEL_19, ADC_CLK_CYCLE_810_5);
+	adc_setADCclock(&rcc, &adc_Handler, ADCSEL_CLK_PLL2, ADCx_CKMODE_HCLK_DIV_2);
+	adc_startCalibration(&adc_Handler, ADCAL_TYPE_SINGLE_END, ADCAL_LINEARITY_ON);
+
 	adc_enableTempSensor(&adc_Handler, ENABLE);
 
 	/*< Setting analog Pin >*/
@@ -42,7 +45,9 @@ int main(void) {
 			setOneBitRegister(gpioB.pODR, PIN_0, HIGH); //GREEN LED
 			setOneBitRegister(gpioB.pODR, PIN_14, LOW);
 		}
-		adc_readValue(&adc_Handler, ADC_CHANNEL_10);
-		adc_setADC_On_Off(&adc_Handler, DISABLE);
+		int tempRawReading = adc_readValue(&adc_Handler, ADC_CHANNEL_10);
+		adc_getTempCelsius(&adc_Handler, tempRawReading);
+
+		//adc_setADC_On_Off(&adc_Handler, DISABLE);
 	}
 }

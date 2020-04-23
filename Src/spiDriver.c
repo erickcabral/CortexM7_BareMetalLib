@@ -9,7 +9,7 @@
 
 void spi_initializeDriver(SPI_ConfigHandler_t *pSPI_Handler, uint8_t gpioX,
 		uint8_t spiX) {
-	initializeGPIOx(&pSPI_Handler->pGPIOx, gpioX);
+	gpio_initializeGPIOx(&pSPI_Handler->pGPIOx, gpioX);
 
 	uint32_t spiX_baseaddress = spi_GetSPIxBaseaddress(spiX);
 	pSPI_Handler->pSPI.pCR1 = (__volU32*) (spiX_baseaddress + 0x00U);

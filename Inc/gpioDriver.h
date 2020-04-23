@@ -76,14 +76,14 @@ typedef struct {
 } GPIOx_Confg_t;
 
 //void initializeGPIOx(GPIOx_Confg_t *gpioX, uint32_t gpio_baseAddr);
-void initializeGPIOx(GPIOx_Confg_t *pGPIOx, uint8_t gpioX);
+void gpio_initializeGPIOx(GPIOx_Confg_t *pGPIOx, uint8_t gpioX);
 void setGPIOxModer(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinMode );
 void setGPIOxType(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinType );
 void setGPIOxSpeed(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinSpeed );
 void setGPIOxResistor(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint8_t pinPUPD );
 uint8_t getGPIOxState(GPIOx_Confg_t* gpioX, uint16_t pinNumber);
 void setGPIOxOutput(GPIOx_Confg_t* gpioX, uint16_t pinNumber,boolean high_low );
-void setGPIOxBSRR(GPIOx_Confg_t* gpioX, uint16_t pinNumber,boolean set_reset );
+void setGPIOxBSRR(GPIOx_Confg_t* gpioX, uint16_t pinNumber,boolean state );
 void setGPIOxLOCK(GPIOx_Confg_t* gpioX, uint16_t pinNumber,boolean locked  );
 void setGPIOxALTFunc(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint16_t altFunc );
 
@@ -93,4 +93,6 @@ void setGPIOxALTFunc(GPIOx_Confg_t* gpioX, uint16_t pinNumber,uint16_t altFunc )
 
 uint32_t gpio_GetGPIOxBASEADDRESS(uint8_t gpioX);
 void gpio_defaultPinOutput(GPIOx_Confg_t *pGPIOx, uint8_t pinNumber);
+void gpio_setPinState(GPIOx_Confg_t *pGPIOx, uint8_t pinNumber, boolean state);
+boolean gpio_getPinState(GPIOx_Confg_t *pGPIOx, uint8_t pinNumber);
 #endif /* GPIODRIVER_H_ */

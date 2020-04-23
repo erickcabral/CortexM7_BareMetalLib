@@ -22,12 +22,19 @@ void adc_enable(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t adcX) {
 		break;
 	}
 
-	setTwoBitRegister(pRCC->pD3CCIPR, RCC_D3CCIPR_ADCSEL, KERNEL_CLK_PER_CK); //ENABLE PERIPHERAL ADC CLOCK
-	adc_setADCclock(pRCC, pADC_Handler, KERNEL_CLK_PER_CK, ADCx_CKMODE_P_CK);
+	setTwoBitRegister(pRCC->pD3CCIPR, RCC_D3CCIPR_ADCSEL, ADCSEL_CLK_PLL2); //ENABLE PERIPHERAL ADC CLOCK (DEFAULT)
 }
-void adc_initialize(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t gpioX, uint8_t adcX) {
+void adc_initialize(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler, uint8_t gpioX,
+		uint8_t adcX) {
+/*
+	setOneBitRegister(pRCC->pCR, RCC_CR_HSION, ENABLE);
+	while(getRegisterValue(pRCC->pCR, RCC_CR_HSION) == DISABLE){
+		//WAIT TILL HSI CLOCK TURNS ON
+	}
+*/
+
 	/*< GPIOx REGISTER INITIALIZATION >*/
-	initializeGPIOx(&pADC_Handler->gpioX, gpioX);
+	gpio_initializeGPIOx(&pADC_Handler->gpioX, gpioX);
 
 	/*< ADCx REGISTER INITIALIZATION >*/
 	uint32_t adc_baseAddress = adc_getADC_baseaddress(adcX);
@@ -61,7 +68,7 @@ void adc_setChannel(ADC_Handler_t *pADC_Handler, uint8_t pcselX, boolean enable)
 }
 /**
  * @param channelX -> ADC_PCSELx
- * @param clkCycles -> ADC_CLK_CYCLEx
+ * @param clkCycles -> adcsel_clk_options_CYCLEx
  */
 void adc_setSampleTime(ADC_Handler_t *pADC_Handler, uint8_t pcselX,
 		uint8_t clkCycles) {
@@ -95,7 +102,7 @@ void adc_setSeq(ADC_Handler_t *pADC_Handler, uint8_t sqrX, uint8_t channelX) {
 /**
  * @
  */
-uint32_t adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t channelX) {
+int adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t channelX) {
 	__volU32 adc_read = 0;
 	if (getRegisterValue(pADC_Handler->adcReg.pCR, ADC_CR_ADEN) != TRUE) {
 		adc_setADC_On_Off(pADC_Handler, ENABLE);
@@ -103,7 +110,7 @@ uint32_t adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t channelX) {
 	//setOneBitRegister(pADC_Handler->adcReg.pPCSEL, channelX, ENABLE);
 	*(pADC_Handler->adcReg.pPCSEL) = (1 << channelX);
 	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADSTART, ENABLE);
-	while (getRegisterValue(pADC_Handler->adcReg.pISR, ADC_ISR_EOC)== FALSE) {
+	while (getRegisterValue(pADC_Handler->adcReg.pISR, ADC_ISR_EOC) == FALSE) {
 		//BLOCK UNTIL THE AND OF CONERSION
 		//	setOneBitRegister(pADC_Handler->adcReg.pISR, ADC_ISR_EOC, TRUE);
 	}
@@ -112,18 +119,33 @@ uint32_t adc_readValue(ADC_Handler_t *pADC_Handler, uint8_t channelX) {
 }
 
 /**
- *  SUPPORT FUNCTIONS
+ * @ADC CALIBRATION SETTINGS
+ *  STEPS:
+ *  1 - disable DEEPPWD
+ *  2 - enable ADVREGEN (Voltage Regulator)
+ *  3 - select ADCALDIF type (calibration Type)
+ *  4 - start Calibration (ADCAL = 1)
+ *  5 - wait Calibration to Finish (ADCAL = 0)
+ *
+ *  @param adcal_type -> Select calibration type [0: SINGLE-END | 1: DEIFFERENTIAL ]
+ *  @param adcal_linearity -> Select calibration linearity [0: SINGLE-END | 1: DEIFFERENTIAL ]
  */
+void adc_startCalibration(ADC_Handler_t *pADC_Handler, boolean adcal_type, boolean adcal_linearity) {
+	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_DEEPPWD, DISABLE); // DISABLE DEEPPWD
+	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADVREGEN, ENABLE); // ENABLE VOLTAGE REGULATOR
+	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADCALDIF, adcal_linearity); //SELECT LINEARITY ON/OFF
+	setOneBitRegister(pADC_Handler->adcReg.pCR, ADC_CR_ADCAL, ENABLE); //START CALIBRATION
+/*
+	*(pADC_Handler->adcReg.pCR) |= (1 <<ADC_CR_ADVREGEN );// ENABLE VOLTAGE REGULATOR
+	*(pADC_Handler->adcReg.pCR) |= (adcal_linearity <<ADC_CR_ADCALDIF );//SELECT LINEARITY ON/OFF
+	*(pADC_Handler->adcReg.pCR) |= (ENABLE <<ADC_CR_ADCAL );//START CALIBRATION
+	*(pADC_Handler->adcReg.pCR) &=~(1 << ADC_CR_DEEPPWD );// DISABLE DEEPPWD
+*/
 
-uint32_t adc_getADC_baseaddress(uint8_t adcX) {
-	switch (adcX) {
-	case ADC1:
-	case ADC2:
-		return ADC1_2_BASEADDRESS;
-	case ADC3:
-		return ADC3_BASEADDR;
+	while (getRegisterValue(pADC_Handler->adcReg.pCR, ADC_CR_ADCAL) == ENABLE) {
+		// WAIT TILL ADCAL BIT TO RESET ( END OF CALIBRATION )
 	}
-	return 0;
+
 }
 
 /**
@@ -157,17 +179,43 @@ void adc_enableTempSensor(ADC_Handler_t *pADC_Handler, boolean enable) {
 
 /**
  * @ SELECT ADC CLOCK
- *  adc_clk -> ADC_CLK_PLL2 | ADC_CLK_PLL3 | ADC_CLK_PER_CK
+ *  adcsel_clk_options -> adcsel_clk_options_PLL2 | adcsel_clk_options_PLL3 | adcsel_clk_options_PER_CK
  */
 void adc_setADCclock(RCC_Reg_t *pRCC, ADC_Handler_t *pADC_Handler,
-		uint8_t adc_clk, uint8_t adcX_ckMode_clk) {
-	setTwoBitRegister(pRCC->pD3CCIPR, RCC_D3CCIPR_ADCSEL, adc_clk);
-	if (adc_clk == KERNEL_CLK_PER_CK) {
+		uint8_t adcsel_clk_options, uint8_t adcX_clk_mode_options) {
+
+	setTwoBitRegister(pRCC->pD3CCIPR, RCC_D3CCIPR_ADCSEL, adcsel_clk_options);
+
+	if (adcsel_clk_options == ADCSEL_CLK_PERIPH_CLK) {
 		setTwoBitRegister(pADC_Handler->adcReg.pADCx_CCR, ADCx_CCR_CKMODE,
-				ADCx_CKMODE_P_CK);
+		ADCx_CKMODE_P_CK);
 	} else {
 		setTwoBitRegister(pADC_Handler->adcReg.pADCx_CCR, ADCx_CCR_CKMODE,
-				adcX_ckMode_clk);
+				adcX_clk_mode_options);
 	}
-
 }
+
+//******************************************* SUPPORT FUNCTIONS *******************************************//
+
+uint32_t adc_getADC_baseaddress(uint8_t adcX) {
+	switch (adcX) {
+	case ADC1:
+	case ADC2:
+		return ADC1_2_BASEADDRESS;
+	case ADC3:
+		return ADC3_BASEADDR;
+	}
+	return 0;
+}
+
+int adc_getTempCelsius(ADC_Handler_t *pADC_Handler, int tempSensorReading){
+	int TS_CAL1 = *(pTEMPER_SENSOR_CAL1);
+	int TS_CAL2 = *(pTEMPER_SENSOR_CAL2);
+	int TS_CURRENT_READING = tempSensorReading;
+
+	//uint32_t TEMP = ((110-30)/(TS_CAL2 - TS_CAL1))*((TS_CURRENT_READING - TS_CAL1) + 30);
+
+	int TEMP = (( 110 - 30) * TS_CURRENT_READING) / (TS_CAL2 - TS_CAL1);
+	return TEMP;
+}
+
